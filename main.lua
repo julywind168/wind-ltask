@@ -1,3 +1,4 @@
+package.path = "lualib/?.lua;"..package.path
 package.cpath = "luaclib/?.so;"..package.cpath
 
 local boot = require "ltask.bootstrap"
