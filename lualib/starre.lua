@@ -24,10 +24,24 @@ function starre.newstate(name, t)
 end
 
 
-function starre.querystate(name)
-	local addr = ltask.call(state_mgr(), "querystate", name)
-	local v, t, actions = ltask.call(addr, "query")
-	return t
+function starre.querystate(...)
+	local names = {...}
+	local addrs = ltask.call(state_mgr(), "lock", names)
+	local results = {}
+
+	for i,addr in ipairs(addrs) do
+		local v, t, actions = ltask.call(addr, "query")
+		
+		local mt; mt = {__index = mt, __close = function ()
+			ltask.fork(function ()
+				ltask.send(state_mgr(), "unlock", names)
+			end)
+		end}
+	
+		results[i] = setmetatable(t, mt)
+	end
+
+	return table.unpack(results)
 end
 
 

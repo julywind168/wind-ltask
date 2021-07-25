@@ -12,6 +12,11 @@ ltask.call(state_mgr, "newstate", "hello", {
 	msg = "world"
 })
 
+ltask.call(state_mgr, "newstate", "game", {
+	nplayer = 0,
+	nroom = 0,
+})
+
 
 ltask.spawn("worker", 1)
 

@@ -9,17 +9,21 @@ print("Worker init", ...)
 
 
 
-local t = starre.querystate("hello")
+local hello, game <close> = starre.querystate("hello", "game")
 
-for k,v in pairs(t) do
+
+print('--------------------------------------------------->')
+
+for k,v in pairs(hello) do
 	print(k,v)
 end
 
 
+for k,v in pairs(game) do
+	print(k,v)
+end
 
-
-
-
+print('--------------------------------------------------->')
 
 
 return S
