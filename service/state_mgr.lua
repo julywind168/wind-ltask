@@ -53,12 +53,15 @@ function S.lock(names)
 end
 
 
-function S.unlock(names)
-	print("get unlock", table.unpack(names))
-	for _,name in ipairs(names) do
+function S.unlock(patch_map)
+	for name,patch in pairs(patch_map) do
+		if patch then
+			ltask.call(state[name], "patch", patch)
+		end
 		locked[name] = false
 	end
 
+	
 	for _,names in ipairs(waitting) do
 		if try_lock(names) then
 			ltask.wakeup(names, querystates(names))

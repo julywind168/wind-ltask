@@ -1,5 +1,5 @@
 service_path = "service/?.lua;ltask/service/?.lua"
-lua_path = "lualib/?.lua"
+lua_path = "?.lua;lualib/?.lua"
 bootstrap = { "bootstrap" }
 logger = { "logger" }
 exclusive = { "timer" }

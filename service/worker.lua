@@ -3,27 +3,37 @@ local starre = require "starre"
 
 local S = setmetatable({}, { __gc = function() print "Worker exit" end } )
 
-print("Worker init", ...)
+local ID = ...
+print("Worker init", ID)
 
 
+local function print_state(...)
+	local states = {...}
+	
+	print('--------------------------------------------------->')
 
+	for i,state in ipairs(states) do
+		for k,v in pairs(state) do
+			print(k,v)
+		end
+		if i ~= #states then
+			print()
+		end
+	end
+
+	print('--------------------------------------------------->')
+end
 
 
 local hello, game <close> = starre.querystate("hello", "game")
 
-
-print('--------------------------------------------------->')
-
-for k,v in pairs(hello) do
-	print(k,v)
+if ID == 1 then
+	print_state(hello, game)
+	hello.msg = "hi, programmers"
+else
+	assert(ID == 2)
+	print_state(hello, game)
 end
-
-
-for k,v in pairs(game) do
-	print(k,v)
-end
-
-print('--------------------------------------------------->')
 
 
 return S

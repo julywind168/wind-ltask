@@ -19,6 +19,7 @@ ltask.call(state_mgr, "newstate", "game", {
 
 
 ltask.spawn("worker", 1)
+ltask.spawn("worker", 2)
 
 
 print "Bootstrap End"

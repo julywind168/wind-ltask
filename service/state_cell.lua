@@ -1,4 +1,5 @@
 local ltask = require "ltask"
+local ltdiff = require "ltdiff"
 
 
 local S = setmetatable({}, { __gc = function() print "StateCell exit" end } )
@@ -6,14 +7,16 @@ local S = setmetatable({}, { __gc = function() print "StateCell exit" end } )
 
 local id, t = ...
 local version = 0
-local actions = {}
+local patches = {}
 
 
 print(string.format('StateCell ["%s"] init', id))
 
 
-function S.version()
-	return v
+function S.patch(diff)
+	patches[#patches + 1] = diff
+	version = version + 1
+	t = ltdiff.patch(t, diff)
 end
 
 
@@ -28,11 +31,11 @@ function S.query(v)
 		return version
 	end
 
-	if actions[v+1] then
+	if patches[v+1] then
 		local list = {}
 
-		for i=v+1, #actions do
-			table.insert(list, actions[i])
+		for i=v+1, #patches do
+			table.insert(list, patches[i])
 		end
 		return version, nil, list
 	else
