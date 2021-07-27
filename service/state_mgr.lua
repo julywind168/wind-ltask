@@ -61,10 +61,23 @@ function S.unlock(patch_map)
 		locked[name] = false
 	end
 
-	
-	for _,names in ipairs(waitting) do
-		if try_lock(names) then
-			ltask.wakeup(names, querystates(names))
+
+	local index = 1
+
+	while true do
+		local done = true
+		for i=index,#waitting do
+			local names = waitting[i]
+			index = i
+			if try_lock(names) then
+				table.remove(waitting, i)
+				ltask.wakeup(names, querystates(names))
+				done = false
+				break
+			end
+		end
+		if index > #waitting or done then
+			break
 		end
 	end
 end
