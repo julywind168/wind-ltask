@@ -63,11 +63,12 @@ function S.unlock(patch_map)
 
 
 	local index = 1
+	local done, names
 
 	while true do
-		local done = true
+		done = true
 		for i=index,#waitting do
-			local names = waitting[i]
+			names = waitting[i]
 			index = i
 			if try_lock(names) then
 				table.remove(waitting, i)
@@ -76,7 +77,7 @@ function S.unlock(patch_map)
 				break
 			end
 		end
-		if index > #waitting or done then
+		if done then
 			break
 		end
 	end
