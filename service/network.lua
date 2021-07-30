@@ -20,10 +20,9 @@ ltask.fork(function ()
 	while fd do
 		ltask.sleep(10)
 		local host, port, msg = socket.recvfrom(fd)
-		if msg:sub(-1) == "\n" then
-			msg = msg:sub(1, -2)
-		end
-		print(string.format("client %s[%d]: %s", host, port, msg))
+		local msg1 =  msg:sub(-1) == "\n" and msg:sub(1, -2) or msg
+		print(string.format("client %s[%d]: %s", host, port, msg1))
+		socket.sendto(fd, host, port, "server echo: "..msg)
 	end
 end)
 

@@ -21,6 +21,37 @@
 extern int errno;
 
 
+
+static int
+l_sendto(lua_State *L) {
+    int fd, port; 
+    const char *host;
+    const char *msg;
+    size_t msglen;
+
+    struct sockaddr_in to_addr = {0};
+    uint32_t tolen = sizeof(to_addr);
+
+    fd = luaL_checkinteger(L, 1);
+    host = luaL_checkstring(L, 2);
+    port = luaL_checkinteger(L, 3);
+    msg = luaL_checklstring(L, 4, &msglen);
+
+    to_addr.sin_family = AF_INET;
+    to_addr.sin_port = htons(port);
+    to_addr.sin_addr.s_addr = inet_addr(host);
+
+    int len = sendto(fd, msg, msglen, 0, (struct sockaddr *) &to_addr, tolen);
+    if (len > 0) {
+        lua_pushinteger(L, len);
+        return 1;
+    } else {
+        if (len < 0) { perror("sendto\n"); }
+        return 0;
+    }
+}
+
+
 static int
 l_recvfrom(lua_State *L) {
     int fd = luaL_checkinteger(L, 1);
@@ -37,6 +68,7 @@ l_recvfrom(lua_State *L) {
         lua_pushlstring(L, buffer, len);
         return 3;
     } else {
+        if (len < 0) { perror("recvfrom\n"); }
         return 0;
     }
 }
@@ -47,7 +79,7 @@ l_listen(lua_State *L) {
     static int reuse = 1;
     const char * host;
     int fd, port, proto;
-    struct sockaddr_in my_addr;
+    struct sockaddr_in my_addr = {0};
 
     host = luaL_checkstring(L, 1);
     port = luaL_checkinteger(L, 2);
@@ -57,8 +89,6 @@ l_listen(lua_State *L) {
         perror("socket\n");
         return 0;
     }
-
-    bzero(&my_addr, sizeof(my_addr));
 
     my_addr.sin_family = AF_INET;
     my_addr.sin_port = htons(port);
@@ -91,6 +121,7 @@ luaopen_lsocket(lua_State* L)
     static const struct luaL_Reg lib[] = {
         {"listen", l_listen},
         {"recvfrom", l_recvfrom},
+        {"sendto", l_sendto},
         {NULL, NULL}
     };
     luaL_newlib(L, lib);
