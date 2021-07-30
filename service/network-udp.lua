@@ -13,19 +13,18 @@ ltask.fork(function ()
 	ltask.sleep(100)
 
 	local fd = socket.listen("127.0.0.1", 7777, socket.SOCK_DGRAM)
-	print("Listen 7777")
+	print("Listen on 7777")
 
 	ltask.sleep(100)
 
 	while fd do
 		ltask.sleep(10)
 		local host, port, msg = socket.recvfrom(fd)
-		local msg1 =  msg:sub(-1) == "\n" and msg:sub(1, -2) or msg
+		local msg1 = msg:sub(-1) == "\n" and msg:sub(1, -2) or msg
 		print(string.format("client %s[%d]: %s", host, port, msg1))
 		socket.sendto(fd, host, port, "server echo: "..msg)
 	end
 end)
-
 
 
 
