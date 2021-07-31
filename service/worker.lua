@@ -25,15 +25,19 @@ local function print_state(...)
 end
 
 
-local hello, game <close> = starre.querystate("hello", "game")
+ltask.fork(function ()
+	local hello, game <close> = starre.querystate("hello", "game")
 
-if ID == 1 then
-	print_state(hello, game)
-	hello.msg = "hi, programmers"
-else
-	assert(ID == 2)
-	print_state(hello, game)
-end
+	if ID == 1 then
+		print_state(hello, game)
+		hello.msg = "hi, programmers"
+	else
+		assert(ID == 2)
+		print_state(hello, game)
+	end
+end)
+
+
 
 
 return S

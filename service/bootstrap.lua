@@ -22,6 +22,5 @@ ltask.spawn("worker", 1)
 ltask.spawn("worker", 2)
 
 
-ltask.spawn("network-tcp")
 
 print "Bootstrap End"
