@@ -37,7 +37,7 @@ function S.socket_data(fd, message)
 	if c.authed == false then
 		if message == "STARRE\n" then
 			c.authed = true
-			socket.send(fd, "Authenticated\nPlease Enter your id to login\n")
+			socket.send(fd, "Authenticated, Please Enter your id to login.\n")
 		else
 			-- todo 
 			-- close invalid connection
