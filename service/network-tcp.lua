@@ -18,12 +18,21 @@ function S.start(workers)
 	epoll.register(epfd, listenfd, EPOLLIN_OR_EPOLLET)
 	print("Listen on 6666")
 
+	local function worker(fd)
+		return workers[fd%#workers + 1]
+	end
+
+	local function close(fd)
+		socket.close(fd)
+		epoll.unregister(epfd, fd)
+		ltask.send(worker(fd), "socket_close", fd)
+	end
 
 	local function accept()
 		local fd, addr, err = socket.accept(listenfd)
 		if fd then
-			print("new connection", fd, addr)
 			epoll.register(epfd, fd, EPOLLIN_OR_EPOLLET)
+			ltask.send(worker(fd), "socket_open", fd, addr)
 		else
 			print("accept error", err)
 		end
@@ -33,14 +42,7 @@ function S.start(workers)
 	local function recv(fd)
 		local msg, err = socket.recv(fd)
 		if msg then
-			local msg1 = msg:sub(-1) == "\n" and msg:sub(1, -2) or msg
-			print(string.format("client[%d]: %s", fd, msg1))
-			socket.send(fd, "server echo: " .. msg)
-
-			if msg1 == "bye" then
-				socket.close(fd)
-				epoll.unregister(epfd, fd)
-			end
+			ltask.send(worker(fd), "socket_data", fd, msg)
 		else
 			print("recv error", err)
 		end
@@ -57,6 +59,7 @@ function S.start(workers)
 				recv(fd)
 			end
 		end
+		ltask.sleep(0)
 	end
 end
 

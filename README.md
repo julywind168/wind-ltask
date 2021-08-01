@@ -43,7 +43,10 @@ worker在处理一个事件的时候, 会通过接口查询并锁住相关state,
 2. 进入ltask, make, 将编译好的 ltask.so 拷贝到 luaclib 文件夹下
 3. 进入 luaclib-src, make, 然后 make install
 4. 在lserver文件下 lua main.lua config
-5. 新开一个窗口 nc 127.0.0.1 6666, 然后输入 hello
+5. 新开一个窗口 nc 127.0.0.1 6666, 然后依次输入
+	STARRE
+	123
+	["ping", {"now": 1111111}]
 ```
 
 
