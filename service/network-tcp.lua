@@ -3,6 +3,7 @@ local starre = require "starre"
 local socket = require "lsocket"
 local epoll = require "lepoll"
 
+
 local EPOLLIN_OR_EPOLLET <const> = epoll.EPOLLIN | epoll.EPOLLET
 
 
@@ -11,9 +12,7 @@ local S = setmetatable({}, { __gc = function() print "Network exit" end } )
 print("Network init")
 
 
-
-ltask.fork(function ()
-	ltask.sleep(100)
+function S.start(workers)
 	local epfd = assert(epoll.create())
 	local listenfd = assert(socket.listen("127.0.0.1", 6666, socket.SOCK_STREAM))
 	epoll.register(epfd, listenfd, EPOLLIN_OR_EPOLLET)
@@ -59,8 +58,7 @@ ltask.fork(function ()
 			end
 		end
 	end
-end)
-
+end
 
 
 

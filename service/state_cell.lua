@@ -1,16 +1,14 @@
 local ltask = require "ltask"
 local ltdiff = require "ltdiff"
 
-
-local S = setmetatable({}, { __gc = function() print "StateCell exit" end } )
-
-
 local id, t = ...
 local version = 0
 local patches = {}
 
 
 print(string.format('StateCell ["%s"] init', id))
+
+local S = setmetatable({}, { __gc = function() print(string.format('StateCell ["%s"] exit', id)) end } )
 
 
 function S.patch(diff)
@@ -41,6 +39,11 @@ function S.query(v)
 	else
 		return version, t
 	end
+end
+
+
+function S.exit()
+	ltask.quit()
 end
 
 

@@ -26,7 +26,7 @@ end
 
 
 ltask.fork(function ()
-	local hello, game <close> = starre.querystate("hello", "game")
+	local hello, game <close> = starre.query("hello", "game")
 
 	if ID == 1 then
 		print_state(hello, game)
@@ -34,6 +34,9 @@ ltask.fork(function ()
 	else
 		assert(ID == 2)
 		print_state(hello, game)
+
+		starre.release("hello")
+		starre.release("game")
 	end
 end)
 

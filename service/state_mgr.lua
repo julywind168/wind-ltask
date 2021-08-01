@@ -32,6 +32,30 @@ local function querystates(names)
 	return list
 end
 
+
+local function try_wakup()
+	local index = 1
+	local done, names
+
+	while true do
+		done = true
+		for i=index,#waitting do
+			names = waitting[i]
+			index = i
+			if try_lock(names) then
+				table.remove(waitting, i)
+				ltask.wakeup(names, querystates(names))
+				done = false
+				break
+			end
+		end
+		if done then
+			break
+		end
+	end
+end
+
+
 ---------------------------------------------------------------------------
 
 function S.newstate(name, t)
@@ -40,6 +64,17 @@ function S.newstate(name, t)
 
 	state[name] = ltask.spawn("state_cell", name, t)
 	locked[name] = false
+
+	try_wakup()
+end
+
+
+function S.releasestate(name)
+	local addr = state[name]
+	if addr then
+		state[name] = nil
+		ltask.send(addr, "exit")
+	end
 end
 
 
@@ -61,26 +96,7 @@ function S.unlock(patch_map)
 		locked[name] = false
 	end
 
-
-	local index = 1
-	local done, names
-
-	while true do
-		done = true
-		for i=index,#waitting do
-			names = waitting[i]
-			index = i
-			if try_lock(names) then
-				table.remove(waitting, i)
-				ltask.wakeup(names, querystates(names))
-				done = false
-				break
-			end
-		end
-		if done then
-			break
-		end
-	end
+	try_wakup()
 end
 
 

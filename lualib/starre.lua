@@ -42,14 +42,20 @@ end)()
 local starre = {}
 
 
-function starre.newstate(name, t)
+function starre.new(name, t)
 	assert(type(name) == "string")
 	assert(type(t) == "table")
 	ltask.call(state_mgr(), "newstate", name, t)
 end
 
 
-function starre.querystate(...)
+function starre.release(name, t)
+	assert(type(name) == "string")
+	ltask.call(state_mgr(), "releasestate", name)
+end
+
+
+function starre.query(...)
 	local names = {...}
 	local addrs = ltask.call(state_mgr(), "lock", names)
 	local results = {}
