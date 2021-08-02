@@ -19,8 +19,6 @@ local function connect_server(host, port, pid)
 	socket.send(fd, pid.."\n")
 	print(socket.recv(fd))
 
-	socket.send(fd, '["ping", {"start":123}]')
-
 	local c = {}
 
 	function c.req(name, args)

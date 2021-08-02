@@ -206,7 +206,7 @@ l_recv(lua_State *L) {
         lua_pushlstring(L, buffer, len);
         return 1;
     } else if (len == 0) {
-        lua_pushstring(L, "");
+        lua_pushnil(L);
         lua_pushstring(L, "closed");
         return 2;
     } else {

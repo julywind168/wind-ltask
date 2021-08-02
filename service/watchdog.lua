@@ -1,5 +1,6 @@
 local ltask = require "ltask"
 
+local AUTH_TOKEN <const> = "STARRE\n"
 local SERVICE_NETWORK <const> = 3
 
 local workers = ...
@@ -11,6 +12,10 @@ print ("Watchgog init")
 
 local function socket_send(fd, msg)
 	ltask.send(SERVICE_NETWORK, "socket_send", fd, msg)
+end
+
+local function socket_close(fd)
+	ltask.send(SERVICE_NETWORK, "socket_close", fd)
 end
 
 
@@ -31,12 +36,13 @@ local function try_dispatch_message(c, fd)
 			break
 		end
 		local sz = c.last:byte(1)*256 + c.last:byte(2)
-		if #s >= sz + 2 then
+
+		if #c.last >= sz + 2 then
 			local pack = c.last:sub(3, 2+sz)
-			c.last = s:sub(3+sz)
-			local resp = ltask.call(worker(pid), pack)
+			c.last = c.last:sub(3+sz)
+			local resp = ltask.call(worker(pid), "player_request", pid, pack)
 			if resp then
-				socket.send(fd, resp)
+				socket_send(fd, resp)
 			end
 		else
 			break
@@ -54,6 +60,7 @@ function S.socket_open(fd, addr)
 	print("new client", fd, addr)
 	connection[fd] = {
 		addr = addr,
+		authed = false,
 		login = false,
 		pid = nil,
 		last = ""
@@ -61,11 +68,22 @@ function S.socket_open(fd, addr)
 end
 
 
+local function shutdown(fd)
+	connection[fd] = nil
+	socket_close(fd)
+end
+
 function S.socket_data(fd, message)
 	local c = assert(connection[fd])
 
-	print("message:", message)
-	if c.login == false then
+	if c.authed == false then
+		if message == AUTH_TOKEN then
+			c.authed = true
+			socket_send(fd, "Authenticated, Please Enter your id to login.\n")
+		else
+			shutdown(fd)
+		end
+	elseif c.login == false then
 		c.pid = message:sub(1, -2)
 		c.login = true
 		ltask.send(worker(c.pid), "player_login", c.pid, c.addr)

@@ -3,7 +3,6 @@ local starre = require "starre"
 local socket = require "lsocket"
 local epoll = require "lepoll"
 
-local AUTH_TOKEN <const> = "STARRE\n"
 local EPOLLIN_OR_EPOLLET <const> = epoll.EPOLLIN | epoll.EPOLLET
 
 
@@ -12,7 +11,6 @@ local S = setmetatable({}, { __gc = function() print "Network exit" end } )
 print("Network init")
 
 
-local connection = {}
 
 
 function S.start(watchdog)
@@ -21,16 +19,17 @@ function S.start(watchdog)
 	epoll.register(epfd, listenfd, EPOLLIN_OR_EPOLLET)
 	print("Listen on 6666")
 
-
 	local function close(fd)
 		socket.close(fd)
 		epoll.unregister(epfd, fd)
 	end
 
+	S.socket_close = close
+
+	------------------------------------------------------------
 	local function accept()
 		local fd, addr, err = socket.accept(listenfd)
 		if fd then
-			connection[fd] = {addr = addr, authed = false}
 			epoll.register(epfd, fd, EPOLLIN_OR_EPOLLET)
 			ltask.send(watchdog, "socket_open", fd, addr)
 		else
@@ -42,25 +41,19 @@ function S.start(watchdog)
 	local function recv(fd)
 		local msg, err = socket.recv(fd)
 		if msg then
-			local c = connection[fd]
-			if c.authed == false then
-				if msg == AUTH_TOKEN then
-					c.authed = true
-					socket.send(fd, "Authenticated, Please Enter your id to login.\n")
-				else
-					close(fd)
-				end
-			else
-				ltask.send(watchdog, "socket_data", fd, msg)
-			end
+			ltask.send(watchdog, "socket_data", fd, msg)
 		else
 			print("recv error", err)
+			if err == "closed" then
+				-- do something
+				close(fd)
+			end
 		end
 	end
 
 
 	while true do
-		local events = epoll.wait(epfd, 1, 512)
+		local events = epoll.wait(epfd, 10, 512)	-- 10ms timeout
 
 		for fd,event in pairs(events) do
 			if fd == listenfd then
