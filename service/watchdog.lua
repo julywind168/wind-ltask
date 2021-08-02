@@ -28,26 +28,21 @@ local function worker(pid)
 end
 
 
-local function try_dispatch_message(c, fd)
-	local pid = c.pid
-
+local function split(s)
+	local packs = {}
 	while true do
-		if #c.last < 2 then
+		if #s < 2 then
 			break
 		end
-		local sz = c.last:byte(1)*256 + c.last:byte(2)
-
-		if #c.last >= sz + 2 then
-			local pack = c.last:sub(3, 2+sz)
-			c.last = c.last:sub(3+sz)
-			local resp = ltask.call(worker(pid), "player_request", pid, pack)
-			if resp then
-				socket_send(fd, resp)
-			end
+		local sz = s:byte(1)*256 + s:byte(2)
+		if #s >= sz + 2 then
+			packs[#packs+1] = s:sub(3, 2+sz)
+			s = s:sub(3+sz)
 		else
 			break
 		end
 	end
+	return s, packs
 end
 
 
@@ -89,8 +84,14 @@ function S.socket_data(fd, message)
 		ltask.send(worker(c.pid), "player_login", c.pid, c.addr)
 		socket_send(fd, "Login success!\n")
 	else
-		c.last = c.last .. message
-		try_dispatch_message(c, fd)
+		local last, packs = split(c.last .. message)
+		c.last = last
+		for _,pack in ipairs(packs) do
+			local resp = ltask.call(worker(c.pid), "player_request", c.pid, pack)
+			if resp then
+				socket_send(fd, resp)
+			end
+		end
 	end
 end
 
