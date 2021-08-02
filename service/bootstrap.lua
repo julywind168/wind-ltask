@@ -28,7 +28,9 @@ for i=1,NWORKER do
 	workers[i] = ltask.spawn("worker", i)
 end
 
-ltask.call(SERVICE_NETWORK, "start", workers)
+local watchdog = ltask.spawn("watchdog", workers)
+
+ltask.call(SERVICE_NETWORK, "start", watchdog)
 
 
 
