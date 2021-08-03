@@ -21,9 +21,10 @@ end
 -- data: `["ping", {"start":123}]`
 
 function S.player_request(pid, data)
-	local p = starre.query("player@"..pid)
+	local p <close> = starre.query("player@"..pid)
 	local t = json.decode(data) 			
 	local f = assert(request[t[1]], t[1])
+
 	local r = f(p, t[2])
 	if r and assert(type(r) == "table") then
 		return json.encode(r)
