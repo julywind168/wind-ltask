@@ -2,6 +2,7 @@ local ltask = require "ltask"
 local starre = require "starre"
 local socket = require "lsocket"
 local epoll = require "lepoll"
+local newgate = require "gate"
 
 local EPOLLIN_OR_EPOLLET <const> = epoll.EPOLLIN | epoll.EPOLLET
 
@@ -13,7 +14,7 @@ print("Network init")
 
 
 
-function S.start(watchdog)
+function S.start(workers)
 	local epfd = assert(epoll.create())
 	local listenfd = assert(socket.listen("127.0.0.1", 6666, socket.SOCK_STREAM))
 	epoll.register(epfd, listenfd, EPOLLIN_OR_EPOLLET)
@@ -24,14 +25,15 @@ function S.start(watchdog)
 		epoll.unregister(epfd, fd)
 	end
 
-	S.socket_close = close
+	local gate = newgate({send = socket.send, close = close}, workers)
+
 
 	------------------------------------------------------------
 	local function accept()
 		local fd, addr, err = socket.accept(listenfd)
 		if fd then
 			epoll.register(epfd, fd, EPOLLIN_OR_EPOLLET)
-			ltask.send(watchdog, "socket_open", fd, addr)
+			gate.on_accept(fd, addr)
 		else
 			print("accept error", err)
 		end
@@ -41,12 +43,12 @@ function S.start(watchdog)
 	local function recv(fd)
 		local msg, err = socket.recv(fd)
 		if msg then
-			ltask.send(watchdog, "socket_data", fd, msg)
+			gate.on_data(fd, msg)
 		else
 			print("recv error", err)
 			if err == "closed" then
-				-- do something
 				close(fd)
+				gate.on_close(fd)
 			end
 		end
 	end
