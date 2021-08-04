@@ -16,6 +16,14 @@ print("Network init")
 
 function S.start(workers)
 	local epfd = assert(epoll.create())
+
+	local efd = socket.eventfd()
+	epoll.register(epfd, efd, EPOLLIN_OR_EPOLLET)
+
+	for _,w in ipairs(workers) do
+		ltask.call(w, "init", efd)
+	end
+
 	local listenfd = assert(socket.listen("127.0.0.1", 6666, socket.SOCK_STREAM))
 	epoll.register(epfd, listenfd, EPOLLIN_OR_EPOLLET)
 	print("Listen on 6666")
@@ -26,7 +34,6 @@ function S.start(workers)
 	end
 
 	local gate = newgate({send = socket.send, close = close}, workers)
-
 
 	------------------------------------------------------------
 	local function accept()
@@ -54,18 +61,22 @@ function S.start(workers)
 	end
 
 
-	while true do
-		local events = epoll.wait(epfd, 10, 512)	-- 10ms timeout
+	ltask.fork(function ()
+		while true do
+			local events = epoll.wait(epfd, -1, 512)	-- 10ms timeout
 
-		for fd,event in pairs(events) do
-			if fd == listenfd then
-				accept(fd)
-			else
-				recv(fd)
+			for fd,event in pairs(events) do
+				if fd == efd then
+					socket.eread(efd) 					-- only to wakeup network
+				elseif fd == listenfd then
+					accept(fd)
+				else
+					recv(fd)
+				end
 			end
+			ltask.sleep(0)
 		end
-		ltask.sleep(0)
-	end
+	end)
 end
 
 

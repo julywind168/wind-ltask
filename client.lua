@@ -27,6 +27,16 @@ local function connect_server(host, port, pid)
 		print(socket.recv(fd))
 	end
 
+	local function count(f)
+		return function (...)
+			local t1 = socket.time()
+			f(...)
+			print("use:", (socket.time()-t1).."ms")
+		end
+	end
+
+	c.req = count(c.req)
+
 	return c
 end
 
@@ -35,7 +45,8 @@ end
 
 local function main()
 	local c = connect_server("127.0.0.1", 6666, "123456")
-	c.req("ping", {now = os.time()})
+	c.req("ping", {now = socket.time()})
+	c.req("ping", {now = socket.time()})
 end
 
 

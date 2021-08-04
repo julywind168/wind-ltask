@@ -76,10 +76,12 @@ return function(network, workers)
 			local last, packs = split(c.last .. message)
 			c.last = last
 			for _,pack in ipairs(packs) do
-				local resp = ltask.call(worker(c.pid), "player_request", c.pid, pack)
-				if resp then
-					network.send(fd, resp)
-				end
+				ltask.fork(function ()
+					local resp = ltask.call(worker(c.pid), "player_request", c.pid, pack)
+					if resp then
+						network.send(fd, resp)
+					end
+				end)
 			end
 		end
 	end

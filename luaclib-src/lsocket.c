@@ -15,10 +15,52 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/eventfd.h>
 
 #define BACKLOG 32
 
 extern int errno;
+
+
+static int
+l_eread(lua_State *L)
+{
+    uint64_t v;
+    int fd = luaL_checkinteger(L, 1);
+    size_t len = read(fd, &v, sizeof(uint64_t));
+    if (len != sizeof(uint64_t)) {
+        perror("eread()");
+        lua_pushnil(L);
+        return 1;
+    }
+    lua_pushinteger(L, v);
+    return 1;
+}
+
+
+static int
+l_ewrite(lua_State *L)
+{
+    int fd = luaL_checkinteger(L, 1);
+    uint64_t v = luaL_checkinteger(L, 2);
+    size_t len = write(fd, &v, sizeof(uint64_t));
+    if (len != sizeof(uint64_t)) {
+        perror("ewrite()");
+        lua_pushnil(L);
+        return 1;
+    }
+    lua_pushinteger(L, len);
+    return 1;
+}
+
+
+static int
+l_eventfd(lua_State *L)
+{
+    int efd = eventfd(0, 0);
+    lua_pushinteger(L, efd);
+    return 1;
+}
 
 
 int
@@ -236,7 +278,7 @@ l_send(lua_State *L) {
 
 
 static int
-l_close(lua_State *L) {
+l_shutdown(lua_State *L) {
     int fd = luaL_checkinteger(L, 1);
     int err = shutdown(fd, 2); // stop both reception and transmission
 
@@ -244,6 +286,16 @@ l_close(lua_State *L) {
         perror("shutdown");
     }
 
+    return 0;
+}
+
+static int
+l_close(lua_State *L) {
+    int fd = luaL_checkinteger(L, 1);
+    int err = close(fd);
+    if (err == -1) {
+        perror("close");
+    }
     return 0;
 }
 
@@ -256,13 +308,35 @@ l_setnonblocking(lua_State *L) {
     return 1;
 }
 
+
+static int
+l_sleep(lua_State *L) {
+    int ti = luaL_checkinteger(L, 1);
+    usleep(ti*1000);
+    return 0;
+}
+
+
+static int
+l_time(lua_State *L)
+{   
+    struct timeval start;
+    gettimeofday( &start, NULL );
+    lua_pushinteger(L, 1000*start.tv_sec + start.tv_usec/1000);
+    return 1;  /* number of results */
+}
+
 extern int
 luaopen_lsocket(lua_State* L)
 {
     static const struct luaL_Reg lib[] = {
         // public
+        {"time", l_time},
+        {"sleep", l_sleep},
+        
         {"listen", l_listen},
         {"setnonblocking", l_setnonblocking},
+        {"shutdown", l_shutdown},
         {"close", l_close},
     
         // udp        
@@ -275,6 +349,11 @@ luaopen_lsocket(lua_State* L)
         {"send", l_send},
         {"recv", l_recv},
         {"connect", l_connect},
+
+        // eventfd
+        {"eventfd", l_eventfd},
+        {"ewrite", l_ewrite},
+        {"eread", l_eread},
         {NULL, NULL}
     };
     luaL_newlib(L, lib);

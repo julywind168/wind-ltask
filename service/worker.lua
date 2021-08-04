@@ -7,13 +7,14 @@ local json = require "json"
 local S = setmetatable({}, { __gc = function() print "Worker exit" end } )
 
 local ID = ...
+local network_efd
 print("Worker init", ID)
 
 
 local request = {}
 
 function request:ping(params)
-	return {start = params.now, now = os.time()}
+	return {start = params.now, now = socket.time()}
 end
 
 --------------------------------------------------------------------
@@ -27,6 +28,9 @@ function S.player_request(pid, data)
 
 	local r = f(p, t[2])
 	if r and assert(type(r) == "table") then
+		ltask.fork(function ()
+			socket.ewrite(network_efd, 1)
+		end)
 		return json.encode(r)
 	end
 end
@@ -41,7 +45,9 @@ function S.player_login(pid, addr)
 end
 
 
-
+function S.init(efd)
+	network_efd = efd 
+end
 
 
 return S
