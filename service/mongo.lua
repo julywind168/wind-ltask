@@ -6,7 +6,7 @@ print("Mongo init")
 
 local S = setmetatable({}, { __gc = function() print "Mongo exit" end } )
 local client = mongo.client(conf)
-local db = client:getDB(conf.dbname)[conf.dbname]
+local db = client:getDB(conf.dbname)
 
 
 function S.count(collname, query)
