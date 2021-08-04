@@ -8,9 +8,9 @@ local cache = {}
 local function collection(coll)
     local c = cache[coll]
     if not c then
-        c = setmetatable({}, {__index = setmetatable({}, {__index = function (_, k)
+        c = setmetatable({}, {__index = setmetatable({}, {__index = function (_, cmd)
             return function (...)
-                return ltask.call(SERVICE_MONGO, k, coll, ...)
+                return ltask.call(SERVICE_MONGO, cmd, coll, ...)
             end
         end})})
         cache[coll] = c
