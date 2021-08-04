@@ -49,7 +49,7 @@ function starre.new(name, t)
 end
 
 
-function starre.release(name, t)
+function starre.release(name)
 	assert(type(name) == "string")
 	ltask.call(state_mgr(), "releasestate", name)
 end

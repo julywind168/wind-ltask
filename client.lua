@@ -22,6 +22,7 @@ local function connect_server(host, port, pid)
 	local c = {}
 
 	function c.req(name, args)
+		print(name)
 		local s = json.encode{name, args or {}}
 		socket.send(fd, string.pack(">s2", s))
 		print(socket.recv(fd))
@@ -31,7 +32,7 @@ local function connect_server(host, port, pid)
 		return function (...)
 			local t1 = socket.time()
 			f(...)
-			print("use:", (socket.time()-t1).."ms")
+			print("use:", (socket.time()-t1).."ms\n")
 		end
 	end
 
@@ -45,8 +46,11 @@ end
 
 local function main()
 	local c = connect_server("127.0.0.1", 6666, "123456")
-	c.req("ping", {now = socket.time()})
-	c.req("ping", {now = socket.time()})
+	-- c.req("ping", {now = socket.time()})
+	-- c.req("ping", {now = socket.time()})
+	c.req("roleinfo")
+	c.req("playgame", {betnum = 1000})
+	c.req("playgame", {betnum = 2000})
 end
 
 

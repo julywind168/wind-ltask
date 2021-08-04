@@ -63,7 +63,7 @@ function S.start(workers)
 
 	ltask.fork(function ()
 		while true do
-			local events = epoll.wait(epfd, -1, 512)	-- 10ms timeout
+			local events = epoll.wait(epfd, -1, 512)
 
 			for fd,event in pairs(events) do
 				if fd == efd then
@@ -79,10 +79,6 @@ function S.start(workers)
 	end)
 end
 
-
-function S.socket_send(fd, msg)
-	socket.send(fd, msg)
-end
 
 
 return S
