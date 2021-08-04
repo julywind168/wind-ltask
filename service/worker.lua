@@ -17,6 +17,18 @@ function request:ping(params)
 	return {start = params.now, now = socket.time()}
 end
 
+function request:playgame(params)
+	self.gold = self.gold - params.betnum
+
+	print("----------------playgame----------------")
+	dump(self)
+	return {ok = true, gold = self.gold}
+end
+
+
+function request:roleinfo()
+	return self
+end
 --------------------------------------------------------------------
 
 -- data: `["ping", {"start":123}]`
