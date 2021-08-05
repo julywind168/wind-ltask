@@ -2,6 +2,7 @@ local ltask = require "ltask"
 local socket = require "lsocket"
 local starre = require "starre"
 local json = require "json"
+local db = require "mongo"
 
 
 local S = setmetatable({}, { __gc = function() print "Worker exit" end } )
