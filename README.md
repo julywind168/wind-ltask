@@ -51,6 +51,15 @@ network-tcp 服务进行网络监听和读取 (socket事件在gate中处理) 对
 ```
 
 
+### ORM (state persistent)
+```
+有了数据库之后, lserver 的另一大优势就可以做了，state 自动落地(可选). 接口可以设计成这样 starre.new(name, t, persistent, filter)
+state 可能包含一些字段我们并不想存数据库, 可以传一个 filter 过滤, 比如 player's filter: {id = true, gold = true, diamond = true}
+
+还可以在后台(Debug Console)提供一个接口, 更据 state 的名字，从数据库从新加载, (比如从后台更新活动时间之类的需求，将非常好解决)
+```
+
+
 ### Test (Linux)
 ```
 0. 系统预先安装好lua5.4
