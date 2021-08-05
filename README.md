@@ -48,7 +48,7 @@ watchog 对链接进行鉴权, 处理登录请求, 登录成功后, 对后续的
 ```
 0. 系统预先安装好lua5.4
 1. 克隆代码到本地, 进入lserver 并创建 luaclib 文件夹
-2. 进入ltask, make, 将编译好的 ltask.so 拷贝到 luaclib 文件夹下
+2. 进入ltask, make, 将编译好的 ltask.so 拷贝至luaclib, 进入3rd下各个库, make or make linux, 然后将 so文件 拷贝至luaclib
 3. 进入 luaclib-src, make, 然后 make install
 4. 在lserver文件下 lua main.lua config
 5. 新开一个窗口 lua client.lua 运行模拟客户端
