@@ -1,2 +1,4 @@
 conf/mongo.lua
 sftp-config.json
+*.o
+*.so

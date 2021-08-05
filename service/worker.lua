@@ -19,9 +19,12 @@ function request:ping(params)
 end
 
 function request:playgame(params)
-	self.gold = self.gold - params.betnum
-
 	print("----------------playgame----------------")
+	if (self.gold - params.betnum < 0) then
+		return {ok = false, msg = "金币不足"}
+	end
+
+	self.gold = self.gold - params.betnum
 	dump(self)
 	return {ok = true, gold = self.gold}
 end
@@ -35,7 +38,7 @@ end
 -- data: `["ping", {"start":123}]`
 
 function S.player_request(pid, data)
-	local p <close> = starre.query("player@"..pid)
+	local p <close> = starre.query("user@"..pid)
 	local t = json.decode(data) 			
 	local f = assert(request[t[1]], t[1])
 
@@ -50,11 +53,12 @@ end
 
 
 function S.player_login(pid, addr)
-	starre.new("player@"..pid, {
-		id = pid,
-		gold = 50000,
-		diamond = 50000
-	})
+	local p = db.user.find_one{id = pid}
+	if not p then
+		p = {id = pid, gold = 50000, diamond = 500000}
+		p._id = db.user.insert(p)
+	end
+	starre.new("user@"..pid, p)
 end
 
 

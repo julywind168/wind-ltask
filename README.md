@@ -48,15 +48,18 @@ network-tcp 服务进行网络监听和读取 (socket事件在gate中处理) 对
 ### 数据库 (mongo)
 ```
 数据库目前只打算集成mongo, 用的是云大的lua-mongo, 用的时候发现没有验证账号功能，于是我从skynet中把这个功能合并了过来.
+需要开发者自行安装mongo, 并配置 conf/mongo.lua (参考conf/mongo.simple.lua)
 ```
 
 
 ### ORM (state persistent)
 ```
-有了数据库之后, lserver 的另一大优势就可以做了，state 自动落地(可选). 接口可以设计成这样 starre.new(name, t, persistent, filter)
-state 可能包含一些字段我们并不想存数据库, 可以传一个 filter 过滤, 比如 player's filter: {id = true, gold = true, diamond = true}
+有了mongo后 我们就可以开启 state orm功能了, 这个功能是可选的, 开启的条件是 state name 必须是 类似于 "user@123456",  @符号前的一个单词用来表示 collname,
+同时 在 conf/persistence.lua 中进行配置, collname 对应 {filter = {}, delay = 0}, filter 和 delay 都是可选的
+fliter 表示存入数据库的合法key值(过滤其他key), 当 delay 大于0 的时候, 同步时间会延后数秒, 可以缓解数据库压力(还能提高客户端响应速度), 但是关服的时候要
+注意留一定的state落地时间
 
-还可以在后台(Debug Console)提供一个接口, 更据 state 的名字，从数据库从新加载, (比如从后台更新活动时间之类的需求，将非常好解决)
+TODO: 提供一个接口, 更据 state 的名字，从数据库从新加载
 ```
 
 

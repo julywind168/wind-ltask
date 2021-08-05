@@ -70,7 +70,7 @@ return function(network, workers)
 		elseif c.login == false then
 			c.pid = message:sub(1, -2)
 			c.login = true
-			ltask.send(worker(c.pid), "player_login", c.pid, c.addr)
+			ltask.call(worker(c.pid), "player_login", c.pid, c.addr)
 			network.send(fd, "Login success!\n")
 		else
 			local last, packs = split(c.last .. message)
