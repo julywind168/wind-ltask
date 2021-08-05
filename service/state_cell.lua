@@ -10,6 +10,7 @@ local patches = {}
 
 print(string.format('StateCell ["%s"] init', id))
 
+local quit = false
 local collname = id:match("(%w+)@(.+)")
 local conf, query, fliter
 
@@ -48,8 +49,11 @@ local function delay_save(delay)
 	if timing == false then
 		timing = true
 		ltask.timeout(delay*100, function ()
-			db[collname].update(query, {["$set"] = fliter(t)})
 			timing = false
+			db[collname].update(query, {["$set"] = fliter(t)})
+			if quit then
+				ltask.quit()
+			end
 		end)
 	end
 end
@@ -95,7 +99,11 @@ end
 
 
 function S.exit()
-	ltask.quit()
+	if timing then
+		quit = true
+	else
+		ltask.quit()
+	end
 end
 
 
