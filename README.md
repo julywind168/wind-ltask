@@ -64,9 +64,10 @@ network-tcp 服务进行网络监听和读取 (socket事件在gate中处理) 对
 
 ### ORM (state persistent)
 ```
-有了mongo后 我们就可以开启 state orm功能了, 这个功能是可选的, 开启的条件是 state name 必须是 类似于 "user@123456", 
-@符号前的一个单词用来表示 collname, 同时 在 conf/persistence.lua 中进行配置, collname 对应 {filter = {}, delay = 0},
-filter 和 delay 都是可选的, fliter 表示存入数据库的合法key值(过滤其他key), 当 delay 大于0 的时候, 同步时间会延后数秒,
+有了mongo后 我们就可以开启 state orm功能了, 这个功能是可选的, 开启的条件是 state name 必须类似于 "user@123456", 
+@符号前的一个单词用来表示 collname, 同时 在 conf/persistence.lua 中进行配置,
+collname 对应 {filter = {}, delay = 0}, filter 和 delay 都是可选的,
+fliter 表示存入数据库的合法key值(过滤其他key), 当 delay 大于0 的时候, 同步时间会延后数秒,
 可以缓解数据库压力(还能提高客户端响应速度), 但是关服的时候要, 注意留一定的state落地时间
 
 TODO: 提供一个接口, 更据 state 的名字，从数据库从新加载
