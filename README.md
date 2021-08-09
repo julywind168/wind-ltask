@@ -1,4 +1,12 @@
-# lserver (Alias: Staree)
+# wind-ltask
+[ltask版本](https://github.com/HYbutterfly/wind-ltask)
+[skynet版本](https://github.com/HYbutterfly/wind-skynet)
+```
+wind server 有2个版本, ltask 定位于技术探索版, skynet版本 则是稳定版, 商业项目可以用skynet版本, 玩的话可以用ltask版本
+```
+
+
+
 
 ### 概述
 ```
