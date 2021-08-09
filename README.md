@@ -2,7 +2,8 @@
 [ltask版本](https://github.com/HYbutterfly/wind-ltask)
 [skynet版本](https://github.com/HYbutterfly/wind-skynet)
 ```
-wind server 有2个版本, ltask 定位于技术探索版, skynet版本 则是稳定版, 商业项目可以用skynet版本, 玩的话可以用ltask版本
+wind server 有2个版本, ltask 定位于技术探索版, skynet版本 则是稳定版, 商业项目可以用skynet版本,
+玩的话可以用ltask版本
 ```
 
 
@@ -20,8 +21,8 @@ wind server 有2个版本, ltask 定位于技术探索版, skynet版本 则是�
 ### Why
 [跨服务的事务问题](https://blog.codingnow.com/2016/07/skynet_transaction.html)
 ```
-用过 skynet 的同学都知道其中一点比较麻烦的地方, 比如服务中函数重入导致的数据不一致问题, 上面链接的跨服务事务问题
-比如管理服务, 逻辑的热更, 这些严重加大了开发者的心智负担以及BUG产生率(自我感觉),
+用过 skynet 的同学都知道其中一点比较麻烦的地方, 比如服务中函数重入导致的数据不一致问题, 以及上面链接的
+跨服务事务问题, 比如管理服务, 逻辑的热更, 这些严重加大了开发者的心智负担以及BUG产生率(自我感觉),
 从而导致了这个框架的诞生, 引用上面链接中的一个评论: "在需要多次往返Actor之间进行通信的时候，感觉非常痛苦"
 ```
 
@@ -48,24 +49,25 @@ worker在处理一个事件的时候, 会通过接口查询并锁住相关state,
 
 ### 网关设计 (tcp)
 ```
-network-tcp 服务进行网络监听和读取 (socket事件在gate中处理) 对连接进行鉴权, 处理登录请求, 登录成功后, 对后续的消息进行切包(同skynet 2字节头, 小端)发送到worker进行处理,
+network-tcp 服务进行网络监听和读取 (socket事件在gate中处理) 对连接进行鉴权, 处理登录请求, 登录成功后, 
+对后续的消息进行切包(同skynet 2字节头, 小端)发送到worker进行处理,
 并处理重连，顶号的逻辑, worker 只处理业务逻辑(玩家登录, 玩家请求, 玩家登出)
 ```
 
 
 ### 数据库 (mongo)
 ```
-数据库目前只打算集成mongo, 用的是云大的lua-mongo, 用的时候发现没有验证账号功能，于是我从skynet中把这个功能合并了过来.
-需要开发者自行安装mongo, 并配置 conf/mongo.lua (参考conf/mongo.simple.lua)
+数据库目前只打算集成mongo, 用的是云大的lua-mongo, 用的时候发现没有验证账号功能，于是我从skynet中把这个
+功能合并了过来.需要开发者自行安装mongo, 并配置 conf/mongo.lua (参考conf/mongo.simple.lua)
 ```
 
 
 ### ORM (state persistent)
 ```
-有了mongo后 我们就可以开启 state orm功能了, 这个功能是可选的, 开启的条件是 state name 必须是 类似于 "user@123456",  @符号前的一个单词用来表示 collname,
-同时 在 conf/persistence.lua 中进行配置, collname 对应 {filter = {}, delay = 0}, filter 和 delay 都是可选的
-fliter 表示存入数据库的合法key值(过滤其他key), 当 delay 大于0 的时候, 同步时间会延后数秒, 可以缓解数据库压力(还能提高客户端响应速度), 但是关服的时候要
-注意留一定的state落地时间
+有了mongo后 我们就可以开启 state orm功能了, 这个功能是可选的, 开启的条件是 state name 必须是 类似于 "user@123456", 
+@符号前的一个单词用来表示 collname, 同时 在 conf/persistence.lua 中进行配置, collname 对应 {filter = {}, delay = 0},
+filter 和 delay 都是可选的, fliter 表示存入数据库的合法key值(过滤其他key), 当 delay 大于0 的时候, 同步时间会延后数秒,
+可以缓解数据库压力(还能提高客户端响应速度), 但是关服的时候要, 注意留一定的state落地时间
 
 TODO: 提供一个接口, 更据 state 的名字，从数据库从新加载
 ```
@@ -75,7 +77,8 @@ TODO: 提供一个接口, 更据 state 的名字，从数据库从新加载
 ```
 0. 系统预先安装好lua5.4
 1. 克隆代码到本地, 进入lserver 并创建 luaclib 文件夹
-2. 进入ltask, make, 将编译好的 ltask.so 拷贝至luaclib, 进入3rd下各个库, make or make linux, 然后将 so文件 拷贝至luaclib
+2. 进入ltask, make, 将编译好的 ltask.so 拷贝至luaclib, 进入3rd下各个库, make or make linux,
+	然后将 so文件 拷贝至luaclib
 3. 进入 luaclib-src, make, 然后 make install
 4. 在lserver文件下 lua main.lua config
 5. 新开一个窗口 lua client.lua 运行模拟客户端
